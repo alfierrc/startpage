@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="container">
+        <div id="left-column">
+            <div id="notes-panel" class="panel">
+                <div class="panel-label">notes</div>
+                <textarea id="notes-textarea" placeholder="[ your notes here ]"></textarea>
+            </div>
+        </div>
+
+        <div id="main-column">
+            <div id="art-panel" class="panel">
+                <canvas id="dither-canvas"></canvas>
+            </div>
+            <div id="links-panel" class="panel">
+                <div class="panel-label">links</div>
+                <div class="links-grid">
+                    <div class="column">
+                        <a href="#" class="link"><span>></span> gmail</a><br>
+                        <a href="#" class="link"><span>></span> calendar</a><br>
+                        <a href="#" class="link"><span>></span> drive</a><br>
+                    </div>
+                    <div class="column">
+                        <a href="#" class="link"><span>></span> github</a><br>
+                        <a href="#" class="link"><span>></span> slack</a><br>
+                        <a href="#" class="link"><span>></span> reddit</a><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="right-column">
+            <div id="system-panel" class="panel">
+                <div class="panel-label">system</div>
+                <button id="theme-toggle">dark</button>
+                <div class="stat-item">time<span id="time" class="value"></span></div>
+                <div class="stat-item">date<span id="date" class="value"></span></div>
+                <div class="divider"></div>
+                <div class="stat-item">ping<span id="ping" class="value">...</span></div>
+                <div class="stat-item">load<span id="load" class="value">...</span></div>
+                <div class="stat-item">fps<span id="fps" class="value">...</span></div>
+            </div>
+            <div id="weather-panel" class="panel">
+                <div class="panel-label">weather</div>
+                <div class="stat-item">loc<span class="value">Helston, UK</span></div>
+                <div class="stat-item">cond<span id="condition" class="value">...</span></div>
+                <div class="stat-item">temp<span id="temp" class="value">...</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
