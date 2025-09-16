@@ -70,6 +70,50 @@ async function fetchNewImage() {
     }
 }
 
+// --- Hacker News Fucntion ----
+async function fetchHackerNews() {
+    const container = document.getElementById('hn-stories-container');
+    if (!container) return;
+
+    container.innerHTML = 'Loading...';
+
+    try {
+        // 1. Fetch the list of top story IDs
+        const response = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json');
+        const storyIds = await response.json();
+
+        // 2. Get the top 5 story IDs and fetch their details concurrently
+        const topFiveIds = storyIds.slice(0, 5);
+        const storyPromises = topFiveIds.map(id =>
+            fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`).then(res => res.json())
+        );
+        const stories = await Promise.all(storyPromises);
+
+        // 3. Display the stories in the UI
+        container.innerHTML = ''; // Clear the "Loading..." text
+        stories.forEach(story => {
+    if (story && story.title && story.url) {
+        const link = document.createElement('a');
+        link.href = story.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.title = story.title; // Add the full title as a tooltip for accessibility
+
+        // Create a span to hold the text, which allows it to be animated
+        const span = document.createElement('span');
+        span.textContent = `> ${story.title}`;
+        link.appendChild(span);
+
+        container.appendChild(link);
+    }
+});
+
+    } catch (error) {
+        container.textContent = 'Error loading stories.';
+        console.error('Error fetching Hacker News:', error);
+    }
+}
+
 // --- Main Application Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -225,5 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setInterval(fetchWeather, 900000);
     fetchWeather();
+	fetchHackerNews();	
 });
 
