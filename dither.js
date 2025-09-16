@@ -16,50 +16,82 @@ function getThemeColors() {
     };
 }
 
-// The main dithering function with full error distribution for high detail.
+// A complete replacement for ditherImage that reverts to the Floyd-Steinberg
+// algorithm and uses a higher resolution for more detail.
 function ditherImage(canvas, image, theme) {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    
-    const maxDim = 300;
-    const scale = Math.min(maxDim / image.width, maxDim / image.height);
-    canvas.width = Math.round(image.width * scale);
-    canvas.height = Math.round(image.height * scale);
-    
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-    
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    canvas.width = 600;
+    canvas.height = 450;
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg-1');
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const canvasRatio = canvas.width / canvas.height;
+    const imageRatio = image.width / image.height;
+    let drawWidth, drawHeight, drawX, drawY;
+    if (imageRatio > canvasRatio) {
+        drawWidth = canvas.width;
+        drawHeight = canvas.width / imageRatio;
+    } else {
+        drawHeight = canvas.height;
+        drawWidth = canvas.height * imageRatio;
+    }
+    drawX = (canvas.width - drawWidth) / 2;
+    drawY = (canvas.height - drawHeight) / 2;
+    ctx.drawImage(image, drawX, Math.round(drawY), Math.round(drawWidth), Math.round(drawHeight));
+
+    const imageData = ctx.getImageData(drawX, drawY, drawWidth, drawHeight);
     const pixels = imageData.data;
-    const pixelDataCopy = new Float32Array(pixels.length);
-    for(let i = 0; i < pixels.length; i++) {
-        pixelDataCopy[i] = pixels[i];
+    const processingData = new Float32Array(pixels.length);
+
+    for (let i = 0; i < pixels.length; i += 4) {
+        const r = pixels[i], g = pixels[i+1], b = pixels[i+2];
+        const luminance = 0.299*r + 0.587*g + 0.114*b;
+        processingData[i] = processingData[i+1] = processingData[i+2] = luminance;
     }
 
-    const threshold = 128;
+    let min = 255, max = 0;
+    for (let i = 0; i < processingData.length; i += 4) {
+        const l = processingData[i];
+        if (l < 254) {
+            if (l < min) min = l;
+            if (l > max) max = l;
+        }
+    }
 
-    for (let i = 0; i < pixelDataCopy.length; i += 4) {
-        const oldR = pixelDataCopy[i];
-        const oldG = pixelDataCopy[i+1];
-        const oldB = pixelDataCopy[i+2];
+    const range = max - min;
+    if (range > 0) {
+        for (let i = 0; i < processingData.length; i += 4) {
+            const oldVal = processingData[i];
+            const newVal = ((oldVal - min) / range) * 255;
+            processingData[i] = processingData[i+1] = processingData[i+2] = newVal;
+        }
+    }
 
-        const luminance = 0.299 * oldR + 0.587 * oldG + 0.114 * oldB;
-        const newPixel = (luminance > threshold) ? theme.background : theme.foreground;
-        
-        pixels[i]   = newPixel[0];
-        pixels[i+1] = newPixel[1];
-        pixels[i+2] = newPixel[2];
-        
-        const errR = oldR - newPixel[0];
-        const errG = oldG - newPixel[1];
-        const errB = oldB - newPixel[2];
-        
+    const pageBackground = theme.background;
+    const pageForeground = theme.foreground;
+
+    for (let i = 0; i < processingData.length; i += 4) {
+        const oldVal = processingData[i];
+        const newGrayVal = (oldVal > 128) ? 255 : 0;
+        const newPixelColor = (newGrayVal === 255) ? pageBackground : pageForeground;
+
+        pixels[i]   = newPixelColor[0];
+        pixels[i+1] = newPixelColor[1];
+        pixels[i+2] = newPixelColor[2];
+
+        // --- THE FIX: Calculate error in the grayscale domain (old gray vs. new gray) ---
+        const err = oldVal - newGrayVal;
+
         const distributeError = (dx, dy, factor) => {
-            const x = (i / 4) % canvas.width;
-            const y = Math.floor((i / 4) / canvas.width);
-            if (x + dx >= 0 && x + dx < canvas.width && y + dy >= 0 && y + dy < canvas.height) {
-                const ni = ((y + dy) * canvas.width + (x + dx)) * 4;
-                pixelDataCopy[ni]   += errR * factor;
-                pixelDataCopy[ni+1] += errG * factor;
-                pixelDataCopy[ni+2] += errB * factor;
+            const x = (i / 4) % imageData.width;
+            const y = Math.floor((i / 4) / imageData.width);
+            if (x + dx >= 0 && x + dx < imageData.width && y + dy >= 0 && y + dy < imageData.height) {
+                const ni = ((y + dy) * imageData.width + (x + dx)) * 4;
+                const errorToApply = err * factor;
+                processingData[ni]   += errorToApply;
+                processingData[ni+1] += errorToApply;
+                processingData[ni+2] += errorToApply;
             }
         };
 
@@ -68,8 +100,8 @@ function ditherImage(canvas, image, theme) {
         distributeError(0, 1, 5 / 16);
         distributeError(1, 1, 1 / 16);
     }
-    
-    ctx.putImageData(imageData, 0, 0);
+
+    ctx.putImageData(imageData, drawX, drawY);
 }
 
 // The only function exported to the main script.
