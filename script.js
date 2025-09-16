@@ -1,10 +1,81 @@
-import { fetchAndDitherNewImage, reDitherCurrentImage } from './dither.js';
+import { applyFloydSteinbergDither } from './effects.js';
+
+// --- State variables ---
+let currentImage = null;
+let currentEffect = applyFloydSteinbergDither; // Set the default effect
+let isInitialLoad = true;
+
+// --- Supabase Setup ---
+const SUPABASE_URL = 'https://nghkopqbjdostbooscob.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5naGtvcHFiamRvc3Rib29zY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMTkwODMsImV4cCI6MjA3MzU5NTA4M30.BATly5_vyMdT3ddF_HuhBfih0dzeSVSWLI68EkpqWYg';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// --- Helper Functions ---
+function getThemeColors() {
+    const styles = getComputedStyle(document.body);
+    const bgColorHex = styles.getPropertyValue('--bg-1').trim();
+    const fgColorHex = styles.getPropertyValue('--txt-3').trim();
+    const hexToRgb = (hex) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null;
+    };
+    return { background: hexToRgb(bgColorHex), foreground: hexToRgb(fgColorHex) };
+}
+
+// --- Core Image Processing Functions ---
+
+function applyCurrentImageEffect() {
+    const artCanvas = document.getElementById('dither-canvas');
+    if (!currentImage || !artCanvas) return;
+
+    const ctx = artCanvas.getContext('2d', { willReadFrequently: true });
+    artCanvas.width = 400; artCanvas.height = 300;
+    
+    const canvasRatio = artCanvas.width / artCanvas.height;
+    const imageRatio = currentImage.width / currentImage.height;
+    let drawWidth, drawHeight, drawX, drawY;
+    if (imageRatio > canvasRatio) { drawWidth = artCanvas.width; drawHeight = artCanvas.width / imageRatio; } else { drawHeight = artCanvas.height; drawWidth = artCanvas.height * imageRatio; }
+    drawX = (artCanvas.width - drawWidth) / 2; drawY = (artCanvas.height - drawHeight) / 2;
+    ctx.drawImage(currentImage, drawX, Math.round(drawY), Math.round(drawWidth), Math.round(drawHeight));
+
+    const imageData = ctx.getImageData(drawX, drawY, drawWidth, drawHeight);
+    const palette = getThemeColors();
+    const processedImageData = currentEffect(imageData, palette);
+
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg-1');
+    ctx.fillRect(0, 0, artCanvas.width, artCanvas.height);
+    ctx.putImageData(processedImageData, drawX, drawY);
+}
+
+async function fetchNewImage() {
+    try {
+        // FIX #2: Use the new 'supabaseClient' variable to make API calls.
+        const { data: files, error } = await supabaseClient.storage.from('art-images').list();
+        if (error) throw error;
+        if (!files || files.length === 0) return;
+
+        const randomFile = files[Math.floor(Math.random() * files.length)];
+        const { data: { publicUrl } } = supabaseClient.storage.from('art-images').getPublicUrl(randomFile.name);
+        
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = () => {
+            currentImage = img;
+            applyCurrentImageEffect();
+        };
+        img.src = publicUrl;
+
+    } catch (error) {
+        console.error("Error fetching image:", error.message);
+    }
+}
+
+// --- Main Application Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Theme Toggle Logic ---
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;
-    let isInitialLoad = true; // Flag to check if it's the first run
 
     function setTheme(theme) {
         if (theme === 'dark') {
@@ -16,12 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         localStorage.setItem('theme', theme);
 
-        // Decide whether to fetch a new image or re-dither the current one
         if (isInitialLoad) {
-            fetchAndDitherNewImage();
-            isInitialLoad = false; // Set the flag to false after the first run
+            fetchNewImage();
+            isInitialLoad = false;
         } else {
-            reDitherCurrentImage();
+            applyCurrentImageEffect();
         }
     }
 
@@ -30,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setTheme(currentTheme === 'light' ? 'dark' : 'light');
     });
     
-    // Set initial theme and trigger the first dither
     const savedTheme = localStorage.getItem('theme') || 'dark';
     setTheme(savedTheme);
 
@@ -53,35 +122,36 @@ document.addEventListener('DOMContentLoaded', () => {
         timeEl.textContent = now.toLocaleTimeString('en-GB');
         dateEl.textContent = now.toLocaleDateString('en-CA');
     }
-    setInterval(updateTime, 1000); 
+    setInterval(updateTime, 1000);
     updateTime();
 
     loadEl.textContent = `${Math.round(performance.now())} ms`;
     
-    function updatePing() { 
+    function updatePing() {
         pingEl.textContent = `${Math.floor(Math.random() * 40) + 10} ms`;
     }
-    setInterval(updatePing, 3000); 
+    setInterval(updatePing, 3000);
     updatePing();
 
-    let frameCount = 0; 
+    let frameCount = 0;
     let lastTime = performance.now();
     function updateFPS() {
-        frameCount++; 
+        frameCount++;
         const currentTime = performance.now();
-        if (currentTime >= lastTime + 1000) { 
+        if (currentTime >= lastTime + 1000) {
             fpsEl.textContent = frameCount;
-            frameCount = 0; 
-            lastTime = currentTime; 
+            frameCount = 0;
+            lastTime = currentTime;
         }
         requestAnimationFrame(updateFPS);
     }
     updateFPS();
 
-    function fetchWeather() { 
-        conditionEl.textContent = 'Partly Cloudy'; 
+    function fetchWeather() {
+        conditionEl.textContent = 'Partly Cloudy';
         tempEl.textContent = '14°C';
     }
-    setInterval(fetchWeather, 900000); 
-    fetchWeather(); 
+    setInterval(fetchWeather, 900000);
+    fetchWeather();
 });
+
