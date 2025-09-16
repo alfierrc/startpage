@@ -103,10 +103,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     setTheme(savedTheme);
 
-    // --- Editable Notes Logic ---
-    const notesTextarea = document.getElementById('notes-textarea');
-    notesTextarea.value = localStorage.getItem('savedNotes') || '';
-    notesTextarea.addEventListener('input', () => { localStorage.setItem('savedNotes', notesTextarea.value); });
+    // --- Post-its Logic ---
+    const addPostItBtn = document.getElementById('add-post-it-btn');
+    const postItsContainer = document.getElementById('post-its-container');
+
+    // Renders a single note object into the DOM
+    const renderPostIt = (note) => {
+        const postItDiv = document.createElement('div');
+        postItDiv.classList.add('post-it');
+        postItDiv.dataset.id = note.id;
+
+        const textarea = document.createElement('textarea');
+        textarea.classList.add('post-it-textarea');
+        textarea.value = note.content || '';
+        textarea.placeholder = '[ new post-it ]';
+
+        // Auto-save when the user stops typing
+        let timeoutId;
+        textarea.addEventListener('input', () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(async () => {
+                await supabaseClient
+                    .from('post_its')
+                    .update({ content: textarea.value })
+                    .eq('id', note.id);
+            }, 500); // Save 500ms after last keystroke
+        });
+
+        const archiveBtn = document.createElement('button');
+        archiveBtn.classList.add('archive-btn');
+        archiveBtn.innerHTML = '&times;';
+        archiveBtn.addEventListener('click', async () => {
+            await supabaseClient
+                .from('post_its')
+                .update({ is_archived: true })
+                .eq('id', note.id);
+            postItDiv.remove(); // Remove from UI
+        });
+
+        postItDiv.appendChild(textarea);
+        postItDiv.appendChild(archiveBtn);
+        postItsContainer.appendChild(postItDiv);
+    };
+
+    // Fetches all active notes from Supabase on page load
+    const loadPostIts = async () => {
+        const { data: notes, error } = await supabaseClient
+            .from('post_its')
+            .select('*')
+            .eq('is_archived', false)
+            .order('created_at', { ascending: true });
+        
+        if (error) {
+            console.error("Error loading post-its:", error);
+            return;
+        }
+        
+        postItsContainer.innerHTML = ''; // Clear existing notes
+        notes.forEach(note => renderPostIt(note));
+    };
+
+    // Creates a new note when the '+' button is clicked
+    addPostItBtn.addEventListener('click', async () => {
+        const { data, error } = await supabaseClient
+            .from('post_its')
+            .insert([{ content: '' }])
+            .select();
+        
+        if (error) {
+            console.error("Error adding post-it:", error);
+            return;
+        }
+        
+        renderPostIt(data[0]);
+    });
+
+    loadPostIts(); // Load initial notes
 
     // --- Live Data Elements ---
     const timeEl = document.getElementById('time');

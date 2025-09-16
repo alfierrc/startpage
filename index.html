@@ -8,15 +8,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
     <div id="container">
         <div id="left-column">
             <div id="notes-panel" class="panel">
-                <div class="panel-label">notes</div>
-                <textarea id="notes-textarea" placeholder="[ your notes here ]"></textarea>
+                <div class="panel-label">post-its</div>
+                <button id="add-post-it-btn">+</button>
+                <div id="post-its-container">
+                    </div>
             </div>
         </div>
 
@@ -54,7 +57,7 @@
             </div>
             <div id="weather-panel" class="panel">
                 <div class="panel-label">weather</div>
-                <div class="stat-item">loc<span class="value">Helston, UK</span></div>
+                <div class="stat-item">loc<span class="value">Truro, UK</span></div>
                 <div class="stat-item">cond<span id="condition" class="value">...</span></div>
                 <div class="stat-item">temp<span id="temp" class="value">...</span></div>
             </div>
