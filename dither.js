@@ -21,8 +21,8 @@ function getThemeColors() {
 function ditherImage(canvas, image, theme) {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    canvas.width = 600;
-    canvas.height = 450;
+    canvas.width = 400;
+    canvas.height = 300;
     ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg-1');
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
