@@ -1,10 +1,11 @@
-import { runDither } from './dither.js';
+import { fetchAndDitherNewImage, reDitherCurrentImage } from './dither.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Theme Toggle Logic ---
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;
-    
+    let isInitialLoad = true; // Flag to check if it's the first run
+
     function setTheme(theme) {
         if (theme === 'dark') {
             body.classList.add('dark-mode');
@@ -14,7 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
             themeToggle.textContent = 'dark';
         }
         localStorage.setItem('theme', theme);
-        runDither(); // Re-dither the image when the theme changes
+
+        // Decide whether to fetch a new image or re-dither the current one
+        if (isInitialLoad) {
+            fetchAndDitherNewImage();
+            isInitialLoad = false; // Set the flag to false after the first run
+        } else {
+            reDitherCurrentImage();
+        }
     }
 
     themeToggle.addEventListener('click', () => {
@@ -22,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTheme(currentTheme === 'light' ? 'dark' : 'light');
     });
     
-    // Set initial theme and then run the dither
+    // Set initial theme and trigger the first dither
     const savedTheme = localStorage.getItem('theme') || 'dark';
     setTheme(savedTheme);
 
@@ -30,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const notesTextarea = document.getElementById('notes-textarea');
     notesTextarea.value = localStorage.getItem('savedNotes') || '';
     notesTextarea.addEventListener('input', () => { localStorage.setItem('savedNotes', notesTextarea.value); });
-    
+
     // --- Live Data Elements ---
     const timeEl = document.getElementById('time');
     const dateEl = document.getElementById('date');
@@ -39,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fpsEl = document.getElementById('fps');
     const conditionEl = document.getElementById('condition');
     const tempEl = document.getElementById('temp');
-
+    
     function updateTime() {
         const now = new Date();
         timeEl.textContent = now.toLocaleTimeString('en-GB');
@@ -49,9 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTime();
 
     loadEl.textContent = `${Math.round(performance.now())} ms`;
-
+    
     function updatePing() { 
-        pingEl.textContent = `${Math.floor(Math.random() * 40) + 10} ms`; 
+        pingEl.textContent = `${Math.floor(Math.random() * 40) + 10} ms`;
     }
     setInterval(updatePing, 3000); 
     updatePing();
@@ -62,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         frameCount++; 
         const currentTime = performance.now();
         if (currentTime >= lastTime + 1000) { 
-            fpsEl.textContent = frameCount; 
+            fpsEl.textContent = frameCount;
             frameCount = 0; 
             lastTime = currentTime; 
         }
@@ -72,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function fetchWeather() { 
         conditionEl.textContent = 'Partly Cloudy'; 
-        tempEl.textContent = '14°C'; 
+        tempEl.textContent = '14°C';
     }
     setInterval(fetchWeather, 900000); 
     fetchWeather(); 
