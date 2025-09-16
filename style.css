@@ -211,37 +211,13 @@ a { color: inherit; text-decoration: none; }
 }
 
 #hn-panel a {
-    /* This is the "window" that contains the text */
     display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* This will now work */
     transition: color 0.2s ease;
 }
 
 #hn-panel a:hover {
     color: var(--cyan);
 }
-
-#hn-panel a span {
-    display: inline-block;
-    padding-right: 2rem; /* Adds some space at the end of the scroll */
-    transform: translateX(0); /* The text starts at its normal position */
-}
-
-#hn-panel a:hover span {
-    /* When you hover the link, apply the animation to the span */
-    animation: marquee-scroll 8s linear 0.5s infinite;
-}
-
-/* Defines the scrolling animation */
-@keyframes marquee-scroll {
-    from {
-        transform: translateX(0);
-    }
-    to {
-        /* Scrolls the text all the way to the left by its own full width */
-        transform: translateX(-100%);
-    }
-}
-

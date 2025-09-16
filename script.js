@@ -98,12 +98,7 @@ async function fetchHackerNews() {
         link.target = '_blank';
         link.rel = 'noopener noreferrer';
         link.title = story.title; // Add the full title as a tooltip for accessibility
-
-        // Create a span to hold the text, which allows it to be animated
-        const span = document.createElement('span');
-        span.textContent = `> ${story.title}`;
-        link.appendChild(span);
-
+	link.textContent = `> ${story.title}`; // Set the text directly
         container.appendChild(link);
     }
 });
