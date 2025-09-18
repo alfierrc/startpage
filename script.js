@@ -109,6 +109,12 @@ async function fetchHackerNews() {
     }
 }
 
+// --- Post-it size ---
+function autoResizeTextarea(textarea) {
+    textarea.style.height = 'auto'; // Reset height
+    textarea.style.height = textarea.scrollHeight + 'px'; // Set to content height
+}
+
 // --- Main Application Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -162,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let timeoutId;
         textarea.addEventListener('input', () => {
+            autoResizeTextarea(textarea);
             clearTimeout(timeoutId);
             timeoutId = setTimeout(async () => {
                 await supabaseClient
@@ -186,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         postItDiv.appendChild(textarea);
         postItDiv.appendChild(archiveBtn);
         postItsContainer.appendChild(postItDiv);
+        autoResizeTextarea(textarea);
     };
 
     // Fetches all active notes from Supabase, ordered by position

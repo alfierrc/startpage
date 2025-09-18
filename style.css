@@ -173,8 +173,9 @@ a { color: inherit; text-decoration: none; }
     position: relative;
     border: 1px solid var(--bg-3);
     padding: 0.5rem;
+    padding-top: 15px;
     padding-right: 30px; 
-    padding-left: 2rem;
+    padding-left: 1rem;
 }
 
 .drag-handle {
@@ -182,21 +183,20 @@ a { color: inherit; text-decoration: none; }
     top: 0;
     right: 0;
     bottom: 0;
-    width: 30px; /* The handle now fills that 30px space */
+    width: 30px;
     cursor: grab;
 }
 
 .post-it-ghost {
-    opacity: 0; /* Make the placeholder invisible, as requested */
+    opacity: 0;
 }
 
-/* This is the actual item being dragged by the cursor */
 .post-it-drag {
-    opacity: 1 !important; /* Ensure it's fully solid */
-    background: var(--bg-3); /* Give it a slightly different background */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2); /* Add a drop shadow */
-    transform: rotate(3deg); /* Add a slight tilt for effect */
-    cursor: grabbing; /* Change cursor to a grabbing hand */
+    opacity: 1 !important;
+    background: var(--bg-3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transform: rotate(3deg);
+    cursor: grabbing;
 }
 
 .post-it-textarea {
@@ -208,7 +208,6 @@ a { color: inherit; text-decoration: none; }
     width: 100%;
     resize: none;
     outline: none;
-    height: 60px; /* Give it a default height */
 }
 
 .archive-btn {
@@ -221,6 +220,7 @@ a { color: inherit; text-decoration: none; }
     cursor: pointer;
     font-size: 1rem;
 }
+
 .archive-btn:hover {
     color: var(--txt-1);
 }
@@ -237,7 +237,7 @@ a { color: inherit; text-decoration: none; }
     display: block;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* This will now work */
+    text-overflow: ellipsis;
     transition: color 0.2s ease;
 }
 
