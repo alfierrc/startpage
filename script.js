@@ -182,10 +182,17 @@ document.addEventListener('DOMContentLoaded', () => {
         archiveBtn.classList.add('archive-btn');
         archiveBtn.innerHTML = '&times;';
         archiveBtn.addEventListener('click', async () => {
+            if (textarea.value.trim() === '') {
+              await supabaseClient
+                  .from('post_its')
+                  .delete()
+                  .eq('id', note.id);
+           } else {
             await supabaseClient
                 .from('post_its')
                 .update({ is_archived: true })
                 .eq('id', note.id);
+              }
             postItDiv.remove();
         });
 
