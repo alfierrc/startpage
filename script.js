@@ -150,14 +150,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderPostIt = (note) => {
         const postItDiv = document.createElement('div');
         postItDiv.classList.add('post-it');
-        postItDiv.dataset.id = note.id;
+        postItDiv.dataset.id = note.id; // Use the ID for saving
+
+        const dragHandle = document.createElement('div');
+        dragHandle.classList.add('drag-handle');
 
         const textarea = document.createElement('textarea');
         textarea.classList.add('post-it-textarea');
         textarea.value = note.content || '';
         textarea.placeholder = '[ new post-it ]';
 
-        // Auto-save when the user stops typing
         let timeoutId;
         textarea.addEventListener('input', () => {
             clearTimeout(timeoutId);
@@ -166,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     .from('post_its')
                     .update({ content: textarea.value })
                     .eq('id', note.id);
-            }, 500); // Save 500ms after last keystroke
+            }, 500);
         });
 
         const archiveBtn = document.createElement('button');
@@ -177,28 +179,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 .from('post_its')
                 .update({ is_archived: true })
                 .eq('id', note.id);
-            postItDiv.remove(); // Remove from UI
+            postItDiv.remove();
         });
 
+        postItDiv.appendChild(dragHandle);
         postItDiv.appendChild(textarea);
         postItDiv.appendChild(archiveBtn);
         postItsContainer.appendChild(postItDiv);
     };
 
-    // Fetches all active notes from Supabase on page load
+    // Fetches all active notes from Supabase, ordered by position
     const loadPostIts = async () => {
         const { data: notes, error } = await supabaseClient
             .from('post_its')
             .select('*')
             .eq('is_archived', false)
-            .order('created_at', { ascending: true });
+            .order('position'); // Order by our new column
         
-        if (error) {
-            console.error("Error loading post-its:", error);
-            return;
-        }
+        if (error) { console.error("Error loading post-its:", error); return; }
         
-        postItsContainer.innerHTML = ''; // Clear existing notes
+        postItsContainer.innerHTML = '';
         notes.forEach(note => renderPostIt(note));
     };
 
@@ -209,15 +209,36 @@ document.addEventListener('DOMContentLoaded', () => {
             .insert([{ content: '' }])
             .select();
         
-        if (error) {
-            console.error("Error adding post-it:", error);
-            return;
-        }
+        if (error) { console.error("Error adding post-it:", error); return; }
         
         renderPostIt(data[0]);
     });
 
+    // --- NEW: Initialize SortableJS and save the new order on drop ---
+    new Sortable(postItsContainer, {
+        animation: 150, // Animation speed
+        handle: '.drag-handle', // Tell SortableJS to only use the handle for dragging
+        ghostClass: 'post-it-ghost', // A class for the placeholder
+        dragClass: 'post-it-drag',
+        onEnd: async (evt) => {
+            // Get all the post-it elements in their new order
+            const postIts = Array.from(postItsContainer.children);
+            
+            // Create an array of update promises
+            const updatePromises = postIts.map((postIt, index) =>
+                supabaseClient
+                    .from('post_its')
+                    .update({ position: index })
+                    .eq('id', postIt.dataset.id)
+            );
+            
+            // Execute all updates
+            await Promise.all(updatePromises);
+        }
+    });
+
     loadPostIts(); // Load initial notes
+
 
     // --- Live Data Elements ---
     const timeEl = document.getElementById('time');
