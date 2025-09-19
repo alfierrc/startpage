@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>~</title>
@@ -8,69 +8,83 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
-    
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-</head>
-<body>
+  </head>
+  <body>
 
     <div id="container">
-        <div id="left-column">
-            <div id="notes-panel" class="panel">
-                <div class="panel-label">post-its</div>
-                <button id="add-post-it-btn">+</button>
-                <div id="post-its-container">
-                    </div>
-            </div>
+      <div id="left-column">
+        <div id="notes-panel" class="panel">
+          <div class="panel-label">
+            post-its
+          </div>
+          <button id="add-post-it-btn">+</button>
+          <div id="post-its-container">
+          </div>
+          <button id="archive-open-btn">[ archive ]</button>
         </div>
+      </div>
 
-        <div id="main-column">
-            <div id="art-panel" class="panel">
-                <canvas id="dither-canvas"></canvas>
-            </div>
-            <div id="links-panel" class="panel">
-                <div class="panel-label">links</div>
-                <div class="links-grid">
-                    <div class="column">
-                        <a href="#" class="link"><span>></span> gmail</a><br>
-                        <a href="#" class="link"><span>></span> calendar</a><br>
-                        <a href="#" class="link"><span>></span> drive</a><br>
-                    </div>
-                    <div class="column">
-                        <a href="#" class="link"><span>></span> github</a><br>
-                        <a href="#" class="link"><span>></span> slack</a><br>
-                        <a href="#" class="link"><span>></span> reddit</a><br>
-                    </div>
-                </div>
-            </div>
+      <div id="main-column">
+        <div id="art-panel" class="panel">
+          <canvas id="dither-canvas"></canvas>
         </div>
+        <div id="links-panel" class="panel">
+          <div class="panel-label">links</div>
+          <div class="links-grid">
+            <div class="column">
+              <a href="#" class="link"><span>></span> gmail</a><br>
+              <a href="#" class="link"><span>></span> calendar</a><br>
+              <a href="#" class="link"><span>></span> drive</a><br>
+            </div>
+            <div class="column">
+              <a href="#" class="link"><span>></span> github</a><br>
+              <a href="#" class="link"><span>></span> slack</a><br>
+              <a href="#" class="link"><span>></span> reddit</a><br>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <div id="right-column">
-            <div id="system-panel" class="panel">
-                <div class="panel-label">system</div>
-                <button id="theme-toggle">dark</button>
-                <div class="stat-item">time<span id="time" class="value"></span></div>
-                <div class="stat-item">date<span id="date" class="value"></span></div>
-                <div class="divider"></div>
-                <div class="stat-item">ping<span id="ping" class="value">...</span></div>
-                <div class="stat-item">load<span id="load" class="value">...</span></div>
-                <div class="stat-item">fps<span id="fps" class="value">...</span></div>
-            </div>
-            <div id="weather-panel" class="panel">
-                <div class="panel-label">weather</div>
-                <div class="stat-item">loc<span class="value">Truro, UK</span></div>
-                <div class="stat-item">cond<span id="condition" class="value">...</span></div>
-                <div class="stat-item">temp<span id="temp" class="value">...</span></div>
-            </div>
-	    <div id="hn-panel" class="panel">
-            <div class="panel-label">hacker news</div>
-            <div id="hn-stories-container">
-                </div>
+      <div id="right-column">
+        <div id="system-panel" class="panel">
+          <div class="panel-label">system</div>
+          <button id="theme-toggle">dark</button>
+          <div class="stat-item">time<span id="time" class="value"></span></div>
+          <div class="stat-item">date<span id="date" class="value"></span></div>
+          <div class="divider"></div>
+          <div class="stat-item">ping<span id="ping" class="value">...</span></div>
+          <div class="stat-item">load<span id="load" class="value">...</span></div>
+          <div class="stat-item">fps<span id="fps" class="value">...</span></div>
         </div>
+        <div id="weather-panel" class="panel">
+          <div class="panel-label">weather</div>
+          <div class="stat-item">loc<span class="value">Truro, UK</span></div>
+          <div class="stat-item">cond<span id="condition" class="value">...</span></div>
+          <div class="stat-item">temp<span id="temp" class="value">...</span></div>
         </div>
+        <div id="hn-panel" class="panel">
+          <div class="panel-label">hacker news</div>
+          <div id="hn-stories-container">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="archive-modal" class="modal-overlay hidden">
+      <div class="modal-content panel">
+        <div class="panel-label">
+          archived notes
+        </div>
+        <button id="archive-close-btn">&times;</button>
+        <div id="archive-container">
+        </div>
+      </div>
     </div>
 
     <script type="module" src="script.js"></script>
-</body>
+  </body>
 </html>
