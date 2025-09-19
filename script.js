@@ -1,4 +1,5 @@
 import { applyFloydSteinbergDither } from './effects.js';
+import { initTerminal } from './terminal.js';
 
 // --- State variables ---
 let currentImage = null;
@@ -9,6 +10,37 @@ let isInitialLoad = true;
 const SUPABASE_URL = 'https://nghkopqbjdostbooscob.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5naGtvcHFiamRvc3Rib29zY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMTkwODMsImV4cCI6MjA3MzU5NTA4M30.BATly5_vyMdT3ddF_HuhBfih0dzeSVSWLI68EkpqWYg';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// --- Terminal command definitions ---
+const commands = {
+    'help': () => {
+        return `Available commands:
+        <br>  help     - Show this list
+        <br>  clear    - Clear the terminal history
+        <br>  echo     - Print text back to the terminal
+        <br>  fetchart - Load a new random piece of art
+        <br>  theme    - Change the theme (e.g., 'theme dark')`;
+    },
+    'echo': (args) => {
+        return args.join(' ');
+    },
+    'fetchart': () => {
+        fetchNewImage();
+        return 'Fetching new art...';
+    },
+    'theme': (args) => {
+        const themeToggle = document.getElementById('theme-toggle');
+        const newTheme = args[0];
+        if (newTheme === 'light' || newTheme === 'dark') {
+            const currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+            if (newTheme !== currentTheme) {
+                themeToggle.click();
+            }
+            return `Theme set to ${newTheme}.`;
+        }
+        return `Usage: theme <light|dark>`;
+    }
+};
 
 // --- Helper Functions ---
 function getThemeColors() {
@@ -118,6 +150,9 @@ function autoResizeTextarea(textarea) {
 // --- Main Application Logic ---
 
 document.addEventListener('DOMContentLoaded', () => {
+  // --- Initialize Terminal FIRST ---
+    initTerminal(commands);
+
   // --- Theme Toggle Logic ---
   const themeToggle = document.getElementById('theme-toggle');
   const body = document.body;
