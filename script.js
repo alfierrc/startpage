@@ -201,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     postItDiv.appendChild(archiveBtn);
     postItsContainer.appendChild(postItDiv);
     autoResizeTextarea(textarea);
+    return textarea;
   };
 
   // Fetches all active notes from Supabase, ordered by position
@@ -226,7 +227,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (error) { console.error("Error adding post-it:", error); return; }
 
-    renderPostIt(data[0]);
+    const newTextarea = renderPostIt(data[0]);
+    newTextarea.focus();
   });
 
   // --- NEW: Initialize SortableJS and save the new order on drop ---
