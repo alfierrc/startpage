@@ -353,8 +353,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const pingEl = document.getElementById('ping');
   const loadEl = document.getElementById('load');
   const fpsEl = document.getElementById('fps');
-  const conditionEl = document.getElementById('condition');
-  const tempEl = document.getElementById('temp');
 
   function updateTime() {
     const now = new Date();
@@ -385,13 +383,5 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(updateFPS);
   }
   updateFPS();
-
-  function fetchWeather() {
-    conditionEl.textContent = 'Partly Cloudy';
-    tempEl.textContent = '14°C';
-  }
-  setInterval(fetchWeather, 900000);
-  fetchWeather();
-  fetchHackerNews();	
 });
 

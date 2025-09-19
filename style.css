@@ -45,7 +45,7 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   max-width: 900px;
   align-items: stretch;
-  height: 60vh;
+  height: 70vh;
   padding: 1.5rem;
 }
 
@@ -55,11 +55,11 @@ a { color: inherit; text-decoration: none; }
   gap: 1.5rem;
 }
 
-#left-column { flex: 1; }
+#left-column { flex: 0.75; }
 #main-column { flex: 1.5; }
 #right-column {
-  flex: 1;
-  min-width: 0; /* Add this line */
+  flex: 0.75;
+  min-width: 0;
 }
 
 .panel {
@@ -79,6 +79,37 @@ a { color: inherit; text-decoration: none; }
 
 .stat-item { display: flex; justify-content: space-between; }
 .value { color: var(--txt-1); }
+
+/* --- NEW: Terminal Panel Styles --- */
+
+#terminal-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0.5rem; /* Reduce bottom padding */
+}
+#terminal-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    font-size: 1.1em;
+}
+#terminal-input-line {
+    display: flex;
+    align-items: center;
+}
+#terminal-input {
+    flex-grow: 1;
+    background: none;
+    border: none;
+    color: var(--txt-1);
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+}
+.prompt {
+    margin-right: 0.5rem;
+    color: var(--cyan);
+}
 
 #art-panel {
   border: none;
@@ -166,6 +197,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 #post-its-container {
+  scrollbar-gutter: stable;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
